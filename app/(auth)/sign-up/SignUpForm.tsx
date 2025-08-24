@@ -1,0 +1,132 @@
+"use client";
+import React, { useTransition } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { signUpSchema, SignUpValues } from "@/lib/validation";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { signUp } from "./actions";
+import { toast } from "sonner";
+
+const SignUpForm = () => {
+
+  const [isPending, startTransition] = useTransition();
+
+  const form = useForm<SignUpValues>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      email: "",
+      username: "",
+      password: "",
+      repassword: "",
+    },
+  });
+
+  async function onSubmit(values: SignUpValues) {
+    startTransition(async () => {
+      const { error } = await signUp(values);
+      toast.error(error);
+    });
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+        <FormField
+            control={form.control}
+            name="full_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Họ và tên</FormLabel>
+                <FormControl>
+                  <Input placeholder="Nhập họ và tên" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        <FormField
+          control={form.control}
+          name="username"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tên đăng nhập</FormLabel>
+              <FormControl>
+                <Input placeholder="Nhập tên đăng nhập" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input placeholder="Nhập địa chỉ email" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mật khẩu</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Nhập mật khẩu"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="repassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nhập lại mật khẩu</FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Nhập mật khẩu"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        <Button disabled={isPending} type="submit" className="w-full">
+          Đăng ký
+          <Loader
+            className={cn(
+              "animate-spin ml-2 hidden",
+              isPending && "inline-block"
+            )}
+          />
+        </Button>
+      </form>
+    </Form>
+  );
+};
+
+export default SignUpForm;
